@@ -1,0 +1,13 @@
+# Everything related to .env, python, tkinter and firebase
+# Ignore .env files
+*.env
+
+# Ignore Python byte code
+__pycache__/
+*.py[cod]
+
+# Ignore Tkinter compiled files
+*.pyw
+
+# Ignore Firebase related files
+firebase.json
