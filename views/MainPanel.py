@@ -18,8 +18,7 @@ class MainPanel:
         self.app.title("Main Panel")
         self.app.iconbitmap("assets/images/favicon.ico")
         gen.center_window(self.app, 1100, 650)
-        self.app.minsize(800, 650)
-        self.app.resizable(True, True)
+        self.app.resizable(False, False)
 
         # Crear frame para el menu lateral
         self.side_menu = ctk.CTkFrame(master=self.app, width=200, height=650, corner_radius=0, fg_color=PURPLE_MEDIUM)
