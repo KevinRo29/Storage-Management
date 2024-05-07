@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from utils import generic as gen
 from config import *
+from services.firebase import FirebaseService as fb
 from views.MainPanel import MainPanel
 from tkinter import messagebox
 
@@ -65,16 +66,19 @@ class AuthPage:
         def sign_in(username, password):
             # Se agregla el disabled al botón para evitar que se haga click varias veces
             button_login.configure(state="disabled")
-            #Valida el usuario y la contraseña
-            if username == "admin" and password == "admin":
-                # Si el usuario y la contraseña son correctos, se cierra la ventana de login
+
+            # Verificar si el usuario y contraseña son correctos
+            valid_user = fb.sign_in(self, username, password)
+
+            # Si el usuario es válido, abrir la ventana principal
+            if valid_user:
                 app.destroy()
-                # Se inicia la aplicación principal
                 MainPanel()
+                button_login.configure(state="normal")
+
+            # Si el usuario no es válido, mostrar un mensaje de error
             else:
-                # Si el usuario y la contraseña son incorrectos, se muestra un mensaje de error
                 messagebox.showerror("Error", "Invalid username or password")
-                # Se habilita el botón
                 button_login.configure(state="normal")
 
         # Iniciar la aplicación
