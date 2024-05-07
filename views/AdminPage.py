@@ -5,7 +5,7 @@ from config import *
 from services.firebase import FirebaseService as fb
 from views.modals.AddUserModal import AddUserModal
 
-users_data = [
+users_data_table = [
     ["Name", "Lastname", "Username", "Email", "Phone"],
 ]
 
@@ -57,7 +57,7 @@ class AdminPage:
 
     def create_users_table(self):
         # Crea la tabla con los encabezados
-        self.users_table = CTkTable(master=self.users_table_frame, values=users_data, colors=["#E6E6E6", "#EEEEEE"], 
+        self.users_table = CTkTable(master=self.users_table_frame, values=users_data_table, colors=["#E6E6E6", "#EEEEEE"], 
                                     header_color=PURPLE_MEDIUM, text_color="Black", corner_radius=5)
         self.users_table.edit_row(0, text_color="White")
         self.users_table.pack(expand=True, fill="both", padx=20, pady=(10, 20))
@@ -72,8 +72,8 @@ class AdminPage:
     def refresh_users_table(self):
         # Limpia la tabla y los datos de usuario
         self.users_table.destroy()
-        users_data.clear()
-        users_data.append(["Name", "Lastname", "Username", "Email", "Phone"])
+        users_data_table.clear()
+        users_data_table.append(["Name", "Lastname", "Username", "Email", "Phone"])
         self.get_users_data()
 
         # Recrea la tabla con los datos actualizados
@@ -85,14 +85,14 @@ class AdminPage:
 
         #Add the information to users_data
         for user in users:
-            users_data.append([user["name"], user["lastname"], user["username"], user["email"], user["phone"], "Edit"])
+            users_data_table.append([user["name"], user["lastname"], user["username"], user["email"], user["phone"], "Edit"])
     
     def filter_users_table(self, event=None):
         # Obtiene la palabra clave de búsqueda del campo de búsqueda
         keyword = self.search_field.get().lower()
 
         # Filtra los datos de usuario según la palabra clave
-        filtered_users = [user for user in users_data[1:] if any(keyword in str(field).lower() for field in user)]
+        filtered_users = [user for user in users_data_table[1:] if any(keyword in str(field).lower() for field in user)]
 
         # Actualiza la tabla con los usuarios filtrados
-        self.users_table.update_values([users_data[0]] + filtered_users)
+        self.users_table.update_values([users_data_table[0]] + filtered_users)

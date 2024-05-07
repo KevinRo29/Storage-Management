@@ -214,8 +214,8 @@ class FirebaseService:
         try:
             blob = storage_bucket.blob("ProfilePictures/" + file_name)
             blob.upload_from_filename(file_path)
-            # Use the blob.generate_signed_url method to get a signed URL
-            image_url = blob.generate_signed_url(version="v4", expiration=3600)
+            # Expiration date in 7 days
+            image_url = blob.generate_signed_url(version="v4", expiration=604800)
             return image_url
 
         except Exception as e:

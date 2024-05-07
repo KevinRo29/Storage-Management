@@ -1,7 +1,7 @@
 import bcrypt
 from PIL import Image, ImageTk
 import requests
-import base64
+import time
 
 def read_image(image_path, size):
     # Read the image and resize it
