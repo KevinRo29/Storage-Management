@@ -12,6 +12,9 @@ users_data_table = [
 class AdminPage:
     def __init__(self, parent_frame):
 
+        users_data_table.clear()
+        users_data_table.append(["Name", "Lastname", "Username", "Email", "Phone"])
+
         #Call the funcion to get the user data
         self.get_users_data()
 

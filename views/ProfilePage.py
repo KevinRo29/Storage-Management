@@ -102,11 +102,14 @@ class ProfilePage:
             # Open a dialog to select a file
             file_path = filedialog.askopenfilename(filetypes=[("Image Files", ".jpg .jpeg .png")])
             if file_path:
+                # Folder name
+                folder_name = "ProfilePictures"
+
                 # Set the name of the file
                 file_name = "Profile_Picture_" + gv.user_data["id"]
 
                 # Upload the image to Firebase Storage
-                url_image = fb.upload_image(self, file_path, file_name)
+                url_image = fb.upload_image(self, file_path, file_name, folder_name)
 
                 # Update the user's profile picture
                 gv.user_data["profile_image"] = url_image

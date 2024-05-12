@@ -210,9 +210,9 @@ class FirebaseService:
         Parameters: file_path: string, file_name: string
         Returns: string
     '''
-    def upload_image(self, file_path, file_name):
+    def upload_image(self, file_path, file_name, folder_name):
         try:
-            blob = storage_bucket.blob("ProfilePictures/" + file_name)
+            blob = storage_bucket.blob(f"{folder_name}/{file_name}")
             blob.upload_from_filename(file_path)
             # Expiration date in 7 days
             image_url = blob.generate_signed_url(version="v4", expiration=604800)
