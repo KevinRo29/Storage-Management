@@ -3,12 +3,15 @@ from utils import generic as gen
 from config import *
 from services.firebase import FirebaseService as fb
 from views.modals.AddProductModal import AddProductModal
+from views.modals.EditProductModal import EditProductModal
+from tkinter import filedialog, messagebox
 
 products_data = [
 ]
 
 class ProductsPage:
     def __init__(self, parent_frame):
+        products_data.clear()
         
         self.get_products_data()
 
@@ -34,11 +37,6 @@ class ProductsPage:
         self.search_frame = ctk.CTkFrame(master=self.main_content, width=900, height=50, corner_radius=0, fg_color="White")
         self.search_frame.pack(side="top", fill="x")
 
-        # Search field
-        self.search_field = ctk.CTkEntry(master=self.search_frame, width=600, fg_color="White", corner_radius=10, 
-                                         border_width=2, text_color=PURPLE_MEDIUM, border_color=PURPLE_MEDIUM, placeholder_text="Search product by keyword")
-        self.search_field.pack(side="left", padx=(20, 0), pady=10)
-
         # Refresh button on the right side
         self.refresh_icon = gen.read_image("assets/icons/refresh.png", (15, 15))
         self.refresh_button = ctk.CTkButton(master=self.search_frame, image=self.refresh_icon, fg_color=PURPLE_MEDIUM, hover_color=PURPLE_DARK,
@@ -53,10 +51,20 @@ class ProductsPage:
         self.create_products_card()
 
     def show_add_user_modal(self):
-        AddProductModal()
+        AddProductModal(self)
 
     def refresh_products(self):
+        # Clear the current products data
+        products_data.clear()
+
+        # Get the updated products data
         self.get_products_data()
+
+        # Destroy the current products table
+        for widget in self.users_table_frame.winfo_children():
+            widget.destroy()
+
+        # Create the updated products table
         self.create_products_card()
 
     def create_products_card(self):
@@ -78,23 +86,70 @@ class ProductsPage:
                 product_card = ctk.CTkFrame(master=row_frame, width=card_width, height=200, corner_radius=12, fg_color="gray")
                 product_card.pack(side="left", padx=10, pady=10, expand=True)  # Ajusta al ancho disponible
 
-                product_image = gen.read_image_from_url(product[0], (200, 200))
-                product_image_label = ctk.CTkLabel(master=product_card, image=product_image, fg_color="transparent", text="")
+                product_image = gen.read_image_from_url(product[1], (200, 200))
+                product_image_label = ctk.CTkLabel(master=product_card, image=product_image, fg_color="transparent", 
+                                                   text="")
                 product_image_label.pack(side="top", padx=10, pady=10, fill="x")
+                product_image_label.bind("<Button-1>", lambda event, product_id=product[0]: self.updated_product_image(product_id))
+                product_image_label.configure(cursor="hand2")
 
-                product_name = ctk.CTkLabel(master=product_card, text=product[1], font=("Century Gothic", 14), fg_color="transparent", text_color="White")
+                product_name = ctk.CTkLabel(master=product_card, text=product[2], font=("Century Gothic", 14), fg_color="transparent", text_color="White")
                 product_name.pack(side="top", padx=10, pady=2, fill="x")
 
-                product_description = ctk.CTkLabel(master=product_card, text=product[2], font=("Century Gothic", 12), fg_color="transparent", text_color="White")
+                product_description = ctk.CTkLabel(master=product_card, text=product[3], font=("Century Gothic", 12), fg_color="transparent", text_color="White")
                 product_description.pack(side="top", padx=10, pady=2, fill="x")
 
-                product_price = ctk.CTkLabel(master=product_card, text="$" + str(product[3]), font=("Century Gothic", 12), fg_color="transparent", text_color="White")
+                product_price = ctk.CTkLabel(master=product_card, text="$" + str(product[4]), font=("Century Gothic", 12), fg_color="transparent", text_color="White")
                 product_price.pack(side="top", padx=10, pady=2, fill="x")
 
-                product_stock = ctk.CTkLabel(master=product_card, text="Stock: " + str(product[4]), font=("Century Gothic", 12), fg_color="transparent", text_color="White")
+                product_stock = ctk.CTkLabel(master=product_card, text="Stock: " + str(product[5]), font=("Century Gothic", 12), fg_color="transparent", text_color="White")
                 product_stock.pack(side="top", padx=10, pady=2, fill="x")
 
+                # Edit button with full width
+                edit_icon = gen.read_image("assets/icons/edit.png", (15, 15))
+                edit_button = ctk.CTkButton(master=product_card, text="Edit Product", image=edit_icon, fg_color=PURPLE_MEDIUM, hover_color=PURPLE_DARK,
+                                             height=25, width=50, command=lambda product=product: self.show_edit_product_modal(product))
+                edit_button.pack(side="bottom", padx=10, pady=10, fill="x")
+
     def get_products_data(self):
-        products = fb.get_collection(self, "products")
+        products = fb.get_active_collection(self, "products")
         for product in products:
-            products_data.append([product["image"], product["name"], product["description"], product["price"], product["stock"]])
+            products_data.append([product["id"], product["image"], product["name"], product["description"], product["price"], product["stock"]])
+
+    def updated_product_image(self, product_id):
+        try:
+            # Open a dialog to select a file
+            file_path = filedialog.askopenfilename(filetypes=[("Image Files", ".jpg .jpeg .png")])
+            if file_path:
+                # Folder name
+                folder_name = "ProductsPictures"
+
+                # Set the name of the file
+                file_name = "Product_Image_" + product_id
+
+                # Upload the image to Firebase Storage
+                url_image = fb.upload_image(self, file_path, file_name, folder_name)
+
+                # Update the product's image
+                for product in products_data:
+                    if product[0] == product_id:
+                        product[1] = url_image
+
+                # Destroy the current products table
+                for widget in self.users_table_frame.winfo_children():
+                    widget.destroy()
+
+                # Create the updated products table
+                self.create_products_card()
+
+                # Update the product's image in the database
+                fb.update_collection(self, "products", product_id, {"image": url_image})
+
+                # Show success message
+                messagebox.showinfo("Success", "Product image updated successfully")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {e}")
+    
+    def show_edit_product_modal(self, product):
+        EditProductModal(self, product)
