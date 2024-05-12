@@ -37,7 +37,5 @@ Esta aplicación Python utiliza Firebase para almacenamiento de datos en la nube
 1. Ejecuta la aplicación Python:
 
     ```bash
-    python app.py
+    python main.py
     ```
-
-2. La aplicación estará disponible en [http://localhost:5000](http://localhost:5000).
